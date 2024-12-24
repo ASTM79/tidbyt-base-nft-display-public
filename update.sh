@@ -1,0 +1,8 @@
+#!/bin/bash
+
+while true; do
+    echo "Updating Tidbyt display..."
+    pixlet render new_nft_display.star
+    pixlet push biennially-optimum-prolific-vizcacha-f18 new_nft_display.webp --api-token eyJhbGciOiJFUzI1NiIsImtpZCI6IjY1YzFhMmUzNzJjZjljMTQ1MTQyNzk5ODZhMzYyNmQ1Y2QzNTI0N2IiLCJ0eXAiOiJKV1QifQ.eyJhdWQiOiJodHRwczovL2FwaS50aWRieXQuY29tIiwiZXhwIjozMzExODUwMzY0LCJpYXQiOjE3MzUwNTAzNjQsImlzcyI6Imh0dHBzOi8vYXBpLnRpZGJ5dC5jb20iLCJzdWIiOiJQRXdoZ3UxQ09FV2theEpveWlFR3h5UnAxcFkyIiwic2NvcGUiOiJkZXZpY2UiLCJkZXZpY2UiOiJiaWVubmlhbGx5LW9wdGltdW0tcHJvbGlmaWMtdml6Y2FjaGEtZjE4In0.hcv3rfbsu8TGi7m1SV0TUAXurLJ34brmUqFq-BVm2SqDCmLj0x3es64epOOm4uM-YifzZspKBJOweUH5LBwj8Q
+    sleep 10  # Wait 10 seconds before next update
+done

@@ -1,0 +1,9 @@
+{
+    "wallet_address": "YOUR_WALLET_ADDRESS",
+    "alchemy_api_key": "YOUR_ALCHEMY_API_KEY",
+    "tidbyt": {
+        "device_id": "YOUR_DEVICE_ID",
+        "api_token": "YOUR_TIDBYT_API_TOKEN",
+        "update_interval": 10
+    }
+}

@@ -1,0 +1,7 @@
+# Configuration files with sensitive data
+config.json
+*.webp
+.DS_Store
+.env
+.vscode/
+.idea/
