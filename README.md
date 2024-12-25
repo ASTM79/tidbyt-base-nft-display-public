@@ -1,17 +1,18 @@
 # 🖥️ Tidbyt Base NFT Display
 
-Display your Base network NFTs on your Tidbyt device with style! This app fetches NFTs from your Base L2 wallet and creates an engaging display that rotates through your collection.
+Display your Base network NFTs on your Tidbyt device with style! This app fetches NFTs from your Base L2 wallet and creates an engaging display that shows two NFTs side by side, rotating through your collection.
 
 ![Tidbyt Display Example](assets/preview.png)
 
 ## ✨ Features
 
 - 🎨 Display NFTs from Base blockchain
-- 🔄 Auto-rotate through your NFT collection
-- 🖼️ Show NFT images and metadata
-- ⚡ Real-time updates every 10 seconds
+- 🔄 Auto-rotate through your NFT collection every 5 seconds
+- 👥 Show two NFTs side by side
+- 🖼️ Show NFT images and titles
+- ⚡ Support for large NFT collections (up to 1000 NFTs)
 - 🔐 Secure configuration handling
-- 🎯 Error handling and validation
+- 🎯 Optimized display for Tidbyt LED matrix
 
 ## 📋 Prerequisites
 
@@ -20,7 +21,6 @@ Before you begin, ensure you have:
 - 🛠️ [Pixlet](https://tidbyt.dev/docs/build/installing-pixlet) installed
 - 🔑 An Alchemy API key
 - 👛 A Base wallet with NFTs
-- 🔧 `jq` command-line tool
 
 ## 🚀 Quick Start
 
@@ -57,7 +57,7 @@ Create your `config.json` from the template and fill in:
     "tidbyt": {
         "device_id": "YOUR_DEVICE_ID",
         "api_token": "YOUR_TIDBYT_API_TOKEN",
-        "update_interval": 10
+        "update_interval": 5
     }
 }
 ```
@@ -74,8 +74,7 @@ Create your `config.json` from the template and fill in:
 This project takes security seriously:
 - ✅ Uses config templates to avoid credential exposure
 - ✅ Gitignore prevents sensitive file commits
-- ✅ Comprehensive input validation
-- ✅ Error handling for API failures
+- ✅ Secure API key handling
 
 ## 🛠️ Installation
 
@@ -84,16 +83,14 @@ This project takes security seriously:
 # Install Homebrew if needed
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-# Install required tools
-brew install jq
+# Install pixlet
 brew install pixlet
 ```
 
 ### Linux (Ubuntu/Debian)
 ```bash
-# Install required tools
-sudo apt-get update
-sudo apt-get install jq
+# Follow Tidbyt's pixlet installation guide
+# https://tidbyt.dev/docs/build/installing-pixlet
 ```
 
 ## 🔍 Troubleshooting
@@ -109,6 +106,7 @@ Common issues and solutions:
    - Verify Tidbyt API token
    - Check device ID
    - Ensure pixlet is installed correctly
+   - Make sure update.sh is executable (chmod +x update.sh)
 
 ## 🤝 Contributing
 
@@ -129,12 +127,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 If you're having issues, please:
 1. Check the troubleshooting guide
 2. Open an issue with detailed information
-3. Join our community discussions
 
 ## 🔮 Future Plans
 
 - [ ] Support for multiple wallets
-- [ ] Custom display layouts
+- [ ] Additional display layouts
 - [ ] Animation options
 - [ ] NFT metadata filtering
-- [ ] Advanced image processing
+- [ ] Support for NFT collections larger than 1000 items
