@@ -23,27 +23,55 @@ def get_image_url(nft):
             return nft["media"][0].get("gateway", "")
     return None
 
+def fetch_image_with_timeout(url, timeout = 3):
+    # Set a shorter timeout for image fetching
+    try:
+        response = http.get(url, ttl_seconds = timeout)
+        if response.status_code == 200:
+            return response.body()
+    except:
+        return None
+    return None
+
 def get_nft_display(nft):
     image_url = get_image_url(nft)
     title = nft.get("title", "")[:6]
     
-    if image_url:
-        response = http.get(image_url)
-        if response.status_code == 200:
-            return render.Column(
+    if not image_url:
+        return render.Box(
+            width = 28,
+            height = 32,
+            child = render.Text("No URL")
+        )
+
+    image_data = fetch_image_with_timeout(image_url)
+    if not image_data:
+        return render.Box(
+            width = 28,
+            height = 32,
+            child = render.Column(
                 expanded = True,
                 main_align = "center",
-                cross_align = "center",
                 children = [
-                    render.Image(
-                        src = response.body(),
-                        width = 28,
-                        height = 28
-                    ),
+                    render.Text("Loading", font = "tom-thumb"),
                     render.Text(title, font = "tom-thumb")
                 ]
             )
-    return render.Text("No Image")
+        )
+
+    return render.Column(
+        expanded = True,
+        main_align = "center",
+        cross_align = "center",
+        children = [
+            render.Image(
+                src = image_data,
+                width = 28,
+                height = 28
+            ),
+            render.Text(title, font = "tom-thumb")
+        ]
+    )
 
 def main():
     nfts = get_nfts()
