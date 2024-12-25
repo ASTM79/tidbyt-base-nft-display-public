@@ -12,24 +12,40 @@ def get_nfts():
         "owner": WALLET_ADDRESS,
         "withMetadata": "true",
         "pageSize": "100",
-        "excludeFilters[]": "SPAM",
-        "contractAddresses[]": [],
-        "spamConfidenceLevel": "HIGH"
+        "excludeFilters[]": "SPAM",  # Exclude identified spam
+        "spamConfidenceLevel": "VERY_HIGH",  # More aggressive spam filtering
+        "orderBy": "TRANSFERTIME"  # Sort by transfer time to prioritize actively traded NFTs
     }
     
     response = http.get(url = url, params = params)
     data = response.json()
-    
-    # Debug logging
-    print("API Response:", data)
     nfts = data.get("ownedNfts", [])
+    
+    # Additional filtering for legitimate NFTs
+    filtered_nfts = []
+    for nft in nfts:
+        # Skip if no proper metadata
+        if not nft.get("title") or not nft.get("media"):
+            continue
+            
+        # Skip if identified as spam
+        if nft.get("spamInfo", {}).get("isSpam", False):
+            continue
+            
+        # Skip if no valid image
+        media = nft.get("media", [])
+        if not media or not media[0].get("gateway"):
+            continue
+            
+        filtered_nfts.append(nft)
+    
     print("Total NFTs found:", len(nfts))
+    print("Filtered NFTs:", len(filtered_nfts))
     
-    if len(nfts) > 0:
-        print("First NFT contract:", nfts[0].get("contract", {}).get("address", "unknown"))
-        print("First NFT title:", nfts[0].get("title", "unknown"))
+    for nft in filtered_nfts:
+        print("NFT:", nft.get("title"), "- Contract:", nft.get("contract", {}).get("address"))
     
-    return nfts
+    return filtered_nfts
 
 def get_image_url(nft):
     if "media" in nft and nft["media"]:
