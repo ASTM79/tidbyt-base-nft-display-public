@@ -11,33 +11,47 @@ def get_nfts():
     params = {
         "owner": WALLET_ADDRESS,
         "withMetadata": "true",
-        "pageSize": "1000",  # Maximum page size
-        "pageKey": None
+        "pageSize": "1000"
     }
     
     response = http.get(url = url, params = params)
     data = response.json()
-
-    # Log NFT response info for debugging
-    nft_count = len(data.get("ownedNfts", []))
-    print("Total NFTs found:", nft_count)
-    print("Page Key:", data.get("pageKey"))
-    
-    return data.get("ownedNfts", [])
+    nfts = data.get("ownedNfts", [])
+    print("Total NFTs found:", len(nfts))
+    return nfts
 
 def get_image_url(nft):
     if "media" in nft and nft["media"]:
         if len(nft["media"]) > 0:
-            return nft["media"][0].get("gateway", "")
+            url = nft["media"][0].get("gateway", "")
+            # Skip SVG images as they're not well supported
+            if url.lower().endswith(".svg"):
+                return None
+            return url
     return None
 
 def fetch_image_with_timeout(url, timeout = 3):
     try:
         response = http.get(url, ttl_seconds = timeout)
         if response.status_code == 200:
-            return response.body()
-    except:
+            # Check for common image formats
+            data = response.body()
+            if len(data) < 8:  # Basic validation
+                return None
+                
+            # Check file signature/magic numbers
+            if data.startswith(b"\x89PNG") or \
+               data.startswith(b"\xFF\xD8\xFF") or \
+               data.startswith(b"GIF"):
+                return data
+            
+            print("Unsupported image format for URL:", url)
+            return None
+            
+    except Exception as e:
+        print("Error fetching image:", str(e))
         return None
+        
     return None
 
 def get_nft_display(nft):
@@ -48,7 +62,14 @@ def get_nft_display(nft):
         return render.Box(
             width = 28,
             height = 32,
-            child = render.Text("No URL")
+            child = render.Column(
+                expanded = True,
+                main_align = "center",
+                children = [
+                    render.Text(title, font = "tom-thumb"),
+                    render.Text("No img", font = "tom-thumb")
+                ]
+            )
         )
 
     image_data = fetch_image_with_timeout(image_url)
@@ -60,8 +81,8 @@ def get_nft_display(nft):
                 expanded = True,
                 main_align = "center",
                 children = [
-                    render.Text("Loading", font = "tom-thumb"),
-                    render.Text(title, font = "tom-thumb")
+                    render.Text(title, font = "tom-thumb"),
+                    render.Text("Load...", font = "tom-thumb")
                 ]
             )
         )
@@ -94,9 +115,6 @@ def main():
     first_index = int(current_time / 5) % nft_count
     second_index = (first_index + 1) % nft_count
     
-    first_nft = nfts[first_index]
-    second_nft = nfts[second_index]
-    
     print("Displaying NFTs at indices:", first_index, second_index)
     
     return render.Root(
@@ -104,13 +122,13 @@ def main():
             expanded = True,
             main_align = "space_between",
             children = [
-                get_nft_display(first_nft),
+                get_nft_display(nfts[first_index]),
                 render.Box(
                     width = 1,
                     height = 32,
                     color = "#333"
                 ),
-                get_nft_display(second_nft)
+                get_nft_display(nfts[second_index])
             ]
         )
     )
