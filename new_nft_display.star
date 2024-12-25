@@ -31,7 +31,7 @@ def main():
         )
     
     current_time = time.now().unix
-    nft_index = int(current_time / 5) % len(nfts)
+    nft_index = int(current_time / 5) % len(nfts)  # Changed to 5 second rotation
     current_nft = nfts[nft_index]
     
     image_url = get_image_url(current_nft)
