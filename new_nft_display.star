@@ -19,6 +19,7 @@ def get_nfts():
     
     response = http.get(url = url, params = params)
     data = response.json()
+    print("API Response:", data)
     nfts = data.get("ownedNfts", [])
     
     # Additional filtering for legitimate NFTs
