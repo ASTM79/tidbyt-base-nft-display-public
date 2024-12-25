@@ -22,6 +22,28 @@ def get_image_url(nft):
             return nft["media"][0].get("gateway", "")
     return None
 
+def get_nft_display(nft):
+    image_url = get_image_url(nft)
+    title = nft.get("title", "")[:6]
+    
+    if image_url:
+        response = http.get(image_url)
+        if response.status_code == 200:
+            return render.Column(
+                expanded = True,
+                main_align = "center",
+                cross_align = "center",
+                children = [
+                    render.Image(
+                        src = response.body(),
+                        width = 28,  # Slightly smaller to fit two
+                        height = 28
+                    ),
+                    render.Text(title, font = "tom-thumb")
+                ]
+            )
+    return render.Text("No Image")
+
 def main():
     nfts = get_nfts()
     
@@ -31,31 +53,24 @@ def main():
         )
     
     current_time = time.now().unix
-    nft_index = int(current_time / 5) % len(nfts)
-    current_nft = nfts[nft_index]
+    first_index = int(current_time / 5) % len(nfts)
+    second_index = (first_index + 1) % len(nfts)
     
-    image_url = get_image_url(current_nft)
-    title = current_nft.get("title", "")[:8]
-    
-    if image_url:
-        response = http.get(image_url)
-        if response.status_code == 200:
-            return render.Root(
-                child = render.Column(
-                    expanded = True,
-                    main_align = "center",
-                    cross_align = "center",
-                    children = [
-                        render.Image(
-                            src = response.body(),
-                            width = 32,
-                            height = 32
-                        ),
-                        render.Text(title, font = "tom-thumb")
-                    ]
-                )
-            )
+    first_nft = nfts[first_index]
+    second_nft = nfts[second_index]
     
     return render.Root(
-        child = render.Text("No Image")
+        child = render.Row(
+            expanded = True,
+            main_align = "space_between",
+            children = [
+                get_nft_display(first_nft),
+                render.Box(
+                    width = 1,
+                    height = 32,
+                    color = "#333"  # Subtle divider
+                ),
+                get_nft_display(second_nft)
+            ]
+        )
     )
