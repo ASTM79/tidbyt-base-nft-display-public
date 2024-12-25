@@ -8,32 +8,14 @@ BASE_ALCHEMY_URL = "https://base-mainnet.g.alchemy.com/v2/"
 
 def get_nfts():
     url = BASE_ALCHEMY_URL + ALCHEMY_API_KEY + "/getNFTs"
-    all_nfts = []
-    page_key = None
+    params = {
+        "owner": WALLET_ADDRESS,
+        "withMetadata": "true",
+        "pageSize": "1000"  # Increased page size to maximum
+    }
     
-    # Fetch all pages
-    while True:
-        params = {
-            "owner": WALLET_ADDRESS,
-            "withMetadata": "true",
-            "pageSize": "100"
-        }
-        
-        if page_key:
-            params["pageKey"] = page_key
-        
-        response = http.get(url = url, params = params)
-        result = response.json()
-        
-        nfts = result.get("ownedNfts", [])
-        all_nfts.extend(nfts)
-        
-        # Get next page key
-        page_key = result.get("pageKey")
-        if not page_key:
-            break
-    
-    return all_nfts
+    response = http.get(url = url, params = params)
+    return response.json().get("ownedNfts", [])
 
 def get_image_url(nft):
     if "media" in nft and nft["media"]:
