@@ -8,13 +8,32 @@ BASE_ALCHEMY_URL = "https://base-mainnet.g.alchemy.com/v2/"
 
 def get_nfts():
     url = BASE_ALCHEMY_URL + ALCHEMY_API_KEY + "/getNFTs"
-    params = {
-        "owner": WALLET_ADDRESS,
-        "withMetadata": "true",
-        "pageSize": "100"
-    }
-    response = http.get(url = url, params = params)
-    return response.json().get("ownedNfts", [])
+    all_nfts = []
+    page_key = None
+    
+    # Fetch all pages
+    while True:
+        params = {
+            "owner": WALLET_ADDRESS,
+            "withMetadata": "true",
+            "pageSize": "100"
+        }
+        
+        if page_key:
+            params["pageKey"] = page_key
+        
+        response = http.get(url = url, params = params)
+        result = response.json()
+        
+        nfts = result.get("ownedNfts", [])
+        all_nfts.extend(nfts)
+        
+        # Get next page key
+        page_key = result.get("pageKey")
+        if not page_key:
+            break
+    
+    return all_nfts
 
 def get_image_url(nft):
     if "media" in nft and nft["media"]:
@@ -36,7 +55,7 @@ def get_nft_display(nft):
                 children = [
                     render.Image(
                         src = response.body(),
-                        width = 28,  # Slightly smaller to fit two
+                        width = 28,
                         height = 28
                     ),
                     render.Text(title, font = "tom-thumb")
@@ -68,7 +87,7 @@ def main():
                 render.Box(
                     width = 1,
                     height = 32,
-                    color = "#333"  # Subtle divider
+                    color = "#333"
                 ),
                 get_nft_display(second_nft)
             ]
