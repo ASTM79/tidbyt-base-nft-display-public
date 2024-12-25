@@ -11,11 +11,19 @@ def get_nfts():
     params = {
         "owner": WALLET_ADDRESS,
         "withMetadata": "true",
-        "pageSize": "1000"  # Maximum page size
+        "pageSize": "1000",  # Maximum page size
+        "pageKey": None
     }
     
     response = http.get(url = url, params = params)
-    return response.json().get("ownedNfts", [])
+    data = response.json()
+
+    # Log NFT response info for debugging
+    nft_count = len(data.get("ownedNfts", []))
+    print("Total NFTs found:", nft_count)
+    print("Page Key:", data.get("pageKey"))
+    
+    return data.get("ownedNfts", [])
 
 def get_image_url(nft):
     if "media" in nft and nft["media"]:
@@ -24,7 +32,6 @@ def get_image_url(nft):
     return None
 
 def fetch_image_with_timeout(url, timeout = 3):
-    # Set a shorter timeout for image fetching
     try:
         response = http.get(url, ttl_seconds = timeout)
         if response.status_code == 200:
@@ -75,6 +82,8 @@ def get_nft_display(nft):
 
 def main():
     nfts = get_nfts()
+    nft_count = len(nfts)
+    print("NFTs available for display:", nft_count)
     
     if not nfts:
         return render.Root(
@@ -82,11 +91,13 @@ def main():
         )
     
     current_time = time.now().unix
-    first_index = int(current_time / 5) % len(nfts)
-    second_index = (first_index + 1) % len(nfts)
+    first_index = int(current_time / 5) % nft_count
+    second_index = (first_index + 1) % nft_count
     
     first_nft = nfts[first_index]
     second_nft = nfts[second_index]
+    
+    print("Displaying NFTs at indices:", first_index, second_index)
     
     return render.Root(
         child = render.Row(
