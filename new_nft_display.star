@@ -4,27 +4,37 @@ load("time.star", "time")
 
 WALLET_ADDRESS = "0xBf57c94BDD49e10356F7a4F3AFaC8E675425a161"
 ALCHEMY_API_KEY = "6nb4oIj2MMnVZmQRsG1lpS5OiiNVhWBp"
-BASE_ALCHEMY_URL = "https://base-mainnet.g.alchemy.com/v2/"
+BASE_ALCHEMY_URL = "https://base-mainnet.g.alchemy.com/nft/v3/"
 
 def get_nfts():
     url = BASE_ALCHEMY_URL + ALCHEMY_API_KEY + "/getNFTs"
     params = {
         "owner": WALLET_ADDRESS,
         "withMetadata": "true",
-        "pageSize": "1000"
+        "pageSize": "100",
+        "excludeFilters[]": "SPAM",
+        "contractAddresses[]": [],
+        "spamConfidenceLevel": "HIGH"
     }
     
     response = http.get(url = url, params = params)
     data = response.json()
+    
+    # Debug logging
+    print("API Response:", data)
     nfts = data.get("ownedNfts", [])
     print("Total NFTs found:", len(nfts))
+    
+    if len(nfts) > 0:
+        print("First NFT contract:", nfts[0].get("contract", {}).get("address", "unknown"))
+        print("First NFT title:", nfts[0].get("title", "unknown"))
+    
     return nfts
 
 def get_image_url(nft):
     if "media" in nft and nft["media"]:
         if len(nft["media"]) > 0:
             url = nft["media"][0].get("gateway", "")
-            # Skip SVG images as they're not well supported
             if url.lower().endswith(".svg"):
                 return None
             return url
@@ -34,12 +44,10 @@ def fetch_image_with_timeout(url, timeout = 3):
     try:
         response = http.get(url, ttl_seconds = timeout)
         if response.status_code == 200:
-            # Check for common image formats
             data = response.body()
-            if len(data) < 8:  # Basic validation
+            if len(data) < 8:
                 return None
                 
-            # Check file signature/magic numbers
             if data.startswith(b"\x89PNG") or \
                data.startswith(b"\xFF\xD8\xFF") or \
                data.startswith(b"GIF"):
@@ -57,6 +65,7 @@ def fetch_image_with_timeout(url, timeout = 3):
 def get_nft_display(nft):
     image_url = get_image_url(nft)
     title = nft.get("title", "")[:6]
+    contract = nft.get("contract", {}).get("address", "")[-4:]
     
     if not image_url:
         return render.Box(
@@ -67,7 +76,7 @@ def get_nft_display(nft):
                 main_align = "center",
                 children = [
                     render.Text(title, font = "tom-thumb"),
-                    render.Text("No img", font = "tom-thumb")
+                    render.Text(contract, font = "tom-thumb")
                 ]
             )
         )
@@ -82,7 +91,7 @@ def get_nft_display(nft):
                 main_align = "center",
                 children = [
                     render.Text(title, font = "tom-thumb"),
-                    render.Text("Load...", font = "tom-thumb")
+                    render.Text(contract, font = "tom-thumb")
                 ]
             )
         )
@@ -116,6 +125,9 @@ def main():
     second_index = (first_index + 1) % nft_count
     
     print("Displaying NFTs at indices:", first_index, second_index)
+    print("NFT titles:", 
+          nfts[first_index].get("title", "unknown"), 
+          nfts[second_index].get("title", "unknown"))
     
     return render.Root(
         child = render.Row(
